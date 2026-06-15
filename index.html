@@ -9,28 +9,37 @@
 <title>Рацион</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f0f;color:#f0f0f0;max-width:430px;margin:0 auto;padding-bottom:20px;}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f0f;color:#f0f0f0;max-width:430px;margin:0 auto;padding-bottom:80px;}
 button{font-family:-apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;border:0.5px solid #333;background:#1a1a1a;color:#f0f0f0;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* Header */
 .header{background:#0f0f0f;padding:54px 16px 12px;position:sticky;top:0;z-index:100;border-bottom:1px solid #1a1a1a;}
 .header h1{font-size:26px;font-weight:700;}
 .header-sub{font-size:13px;color:#666;margin-top:2px;}
 .date-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
 .date-label{font-size:15px;font-weight:600;}
-.date-nav{display:flex;gap:8px;}
 .date-btn{width:32px;height:32px;border-radius:50%;font-size:18px;background:#1a1a1a;border:0.5px solid #333;}
 .prog-bar{background:#1a1a1a;height:5px;margin:10px 0 4px;border-radius:3px;}
 .prog-fill{background:#22c55e;height:5px;border-radius:3px;transition:width 0.4s;}
 .prog-text{font-size:11px;color:#666;text-align:center;}
+
+/* Macros */
 .macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px;}
 .mc{background:#1a1a1a;border-radius:12px;padding:10px 6px;text-align:center;}
 .mc-val{font-size:16px;font-weight:700;color:#22c55e;}
 .mc-val.gray{color:#666;}
 .mc-sub{font-size:10px;color:#555;margin-top:2px;}
+
+/* Tabs */
 .tabs{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
 .tab{padding:7px 14px;border-radius:20px;font-size:13px;white-space:nowrap;flex-shrink:0;background:#1a1a1a;border:0.5px solid #333;color:#888;}
 .tab.active{background:#22c55e;color:#000;font-weight:600;border-color:#22c55e;}
 .tab.today{border-color:#22c55e;color:#22c55e;}
+
+/* Meals */
 .meals{padding:0 16px;}
 .day-type{font-size:13px;color:#666;margin-bottom:10px;}
 .meal{background:#1a1a1a;border-radius:16px;padding:14px;margin-bottom:10px;transition:opacity 0.2s;}
@@ -48,41 +57,143 @@ button{font-family:-apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;bo
 .check-btn{width:100%;padding:11px;border-radius:10px;font-size:14px;background:#2a2a2a;border:0.5px solid #333;color:#aaa;transition:all 0.2s;}
 .check-btn:active{transform:scale(0.97);}
 .check-btn.checked{background:#052e16;color:#22c55e;border-color:#166534;}
+
+/* Rules */
 .rules{background:#1a1a1a;border-radius:16px;padding:14px;margin:12px 16px 0;}
 .rules h3{font-size:14px;color:#22c55e;margin-bottom:8px;}
 .rule{font-size:13px;color:#888;padding:4px 0;}
 .rule::before{content:"✓ ";color:#22c55e;}
+
+/* Stats page */
+.stats-wrap{padding:70px 16px 16px;}
+.stats-wrap h2{font-size:22px;font-weight:700;margin-bottom:16px;}
+.stat-card{background:#1a1a1a;border-radius:16px;padding:14px;margin-bottom:12px;}
+.stat-card h3{font-size:14px;color:#22c55e;margin-bottom:10px;}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.wd{background:#2a2a2a;border-radius:8px;padding:8px 4px;text-align:center;}
+.wd.has{background:#052e16;}
+.wd-name{font-size:9px;color:#666;}
+.wd-pct{font-size:12px;font-weight:700;color:#22c55e;margin-top:2px;}
+.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #2a2a2a;font-size:14px;}
+.stat-row:last-child{border-bottom:none;}
+.stat-row span{color:#22c55e;font-weight:600;}
+.clear-btn{width:100%;background:#2a1a1a;border:0.5px solid #7f1d1d;color:#f87171;padding:14px;border-radius:12px;font-size:14px;margin-top:16px;}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#0f0f0f;border-top:1px solid #1a1a1a;display:flex;padding:8px 0 20px;z-index:200;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:#666;font-size:10px;padding:4px 0;}
+.nav-btn.active{color:#22c55e;}
+.nav-icon{font-size:22px;}
+
+/* Page headers */
+.page-header{padding:54px 16px 16px;border-bottom:1px solid #1a1a1a;}
+.page-header h1{font-size:26px;font-weight:700;}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>🥗 Рацион</h1>
-  <div class="header-sub">Рекомпозиция · Колит · 77кг</div>
-  <div class="date-row">
-    <div class="date-label" id="date-label"></div>
-    <div class="date-nav">
-      <button class="date-btn" onclick="chDay(-1)">‹</button>
-      <button class="date-btn" onclick="chDay(1)">›</button>
+<!-- РАЦИОН -->
+<div class="page active" id="page-racion">
+  <div class="header">
+    <h1>🥗 Рацион</h1>
+    <div class="header-sub">Рекомпозиция · Колит · 77кг</div>
+    <div class="date-row">
+      <div class="date-label" id="date-label"></div>
+      <div style="display:flex;gap:6px;">
+        <button class="date-btn" onclick="chDay(-1)">‹</button>
+        <button class="date-btn" onclick="chDay(1)">›</button>
+      </div>
     </div>
+    <div class="prog-bar"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+    <div class="prog-text" id="pt"></div>
   </div>
-  <div class="prog-bar"><div class="prog-fill" id="pf" style="width:0%"></div></div>
-  <div class="prog-text" id="pt"></div>
+  <div class="macros" id="macros"></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="meals" id="meals"></div>
+  <div class="rules">
+    <h3>Правила при колите</h3>
+    <div class="rule">Овсянку варить на воде</div>
+    <div class="rule">Максимум 1 порция молочки в день</div>
+    <div class="rule">Все овощи только варёные</div>
+    <div class="rule">Последний приём за 2-3 часа до сна</div>
+    <div class="rule">Пить 2-3 литра воды в день</div>
+    <div class="rule">Салаза 1000мг утром и вечером</div>
+    <div class="rule">Подождать 1-1.5ч после еды перед залом</div>
+  </div>
 </div>
 
-<div class="macros" id="macros"></div>
-<div class="tabs" id="tabs"></div>
-<div class="meals" id="meals"></div>
+<!-- СТАТИСТИКА -->
+<div class="page" id="page-stats">
+  <div class="page-header"><h1>📊 Статистика</h1></div>
+  <div class="stats-wrap" style="padding-top:16px;">
+    <div class="stat-card">
+      <h3>Эта неделя</h3>
+      <div class="week-grid" id="week-grid"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-row">Дней с данными <span id="s-days">0</span></div>
+      <div class="stat-row">Лучший день <span id="s-best">—</span></div>
+      <div class="stat-row">Средний % выполнения <span id="s-avg">0%</span></div>
+      <div class="stat-row">Всего отмечено приёмов <span id="s-total">0</span></div>
+    </div>
+    <div class="stat-card">
+      <h3>Прогресс по дням</h3>
+      <div id="day-bars"></div>
+    </div>
+    <button class="clear-btn" onclick="clearAll()">🗑️ Сбросить все данные</button>
+  </div>
+</div>
 
-<div class="rules">
-  <h3>Правила при колите</h3>
-  <div class="rule">Овсянку варить на воде</div>
-  <div class="rule">Максимум 1 порция молочки в день</div>
-  <div class="rule">Все овощи только варёные</div>
-  <div class="rule">Последний приём за 2-3 часа до сна</div>
-  <div class="rule">Пить 2-3 литра воды в день</div>
-  <div class="rule">Салаза 1000мг утром и вечером</div>
-  <div class="rule">Подождать 1-1.5ч после еды перед залом</div>
+<!-- ПРАВИЛА -->
+<div class="page" id="page-rules">
+  <div class="page-header"><h1>📋 Правила</h1></div>
+  <div style="padding:16px;">
+    <div class="stat-card">
+      <h3>Питание при колите</h3>
+      <div class="rule">Овсянку варить на воде, не на молоке</div>
+      <div class="rule">Максимум 1 порция молочки в день</div>
+      <div class="rule">Все овощи только варёные или тушёные</div>
+      <div class="rule">Последний приём за 2-3 часа до сна</div>
+      <div class="rule">Пить 2-3 литра воды в день</div>
+      <div class="rule">Не ложиться 1-1.5ч после еды</div>
+      <div class="rule">4-5 приёмов пищи в день</div>
+    </div>
+    <div class="stat-card">
+      <h3>Лекарства</h3>
+      <div class="rule">Салаза 1000мг — утром и вечером без пропусков</div>
+      <div class="rule">Витамин D + K — после завтрака с жирной едой</div>
+      <div class="rule">Но-шпа — при болях до 3 таблеток</div>
+    </div>
+    <div class="stat-card">
+      <h3>Зал и колит</h3>
+      <div class="rule">Подождать 1-1.5ч после еды перед тренировкой</div>
+      <div class="rule">Пить воду во время тренировки</div>
+      <div class="rule">При болях — только лёгкие упражнения</div>
+      <div class="rule">Без предтреников с кофеином</div>
+    </div>
+    <div class="stat-card">
+      <h3>Стоп-лист</h3>
+      <div class="rule">Алкоголь — исключить полностью</div>
+      <div class="rule">Кофе — избегать</div>
+      <div class="rule">Молоко цельное — нет</div>
+      <div class="rule">Сырые овощи — осторожно</div>
+      <div class="rule">Жареное — нет</div>
+      <div class="rule">Острое — нет</div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="showPage('racion')" id="nav-racion">
+    <div class="nav-icon">🥗</div>Рацион
+  </button>
+  <button class="nav-btn" onclick="showPage('stats')" id="nav-stats">
+    <div class="nav-icon">📊</div>Статистика
+  </button>
+  <button class="nav-btn" onclick="showPage('rules')" id="nav-rules">
+    <div class="nav-icon">📋</div>Правила
+  </button>
 </div>
 
 <script>
@@ -148,6 +259,14 @@ function chk(d,m){return !!st[k(d,m)];}
 function tog(d,m){st[k(d,m)]=!st[k(d,m)];save();render();}
 function chDay(x){cur=(cur+x+7)%7;render();}
 
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='stats') renderStats();
+}
+
 function render(){
   const day=D[cur];
   const tod=(new Date().getDay()+6)%7;
@@ -194,6 +313,48 @@ function render(){
     </div>`;
   }).join('');
 }
+
+function renderStats(){
+  const today=new Date();
+  const todIdx=(today.getDay()+6)%7;
+  const dnames=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  let totalDays=0,totalPct=0,bestDay='',bestPct=0,totalMeals=0;
+  let gridHtml='',barsHtml='';
+
+  for(let i=0;i<7;i++){
+    const d=new Date(today);
+    d.setDate(today.getDate()-todIdx+i);
+    const data=JSON.parse(localStorage.getItem(SK)||'{}');
+    let cnt=0;
+    for(let m=0;m<D[i].meals.length;m++){if(data[i+'_'+m])cnt++;}
+    const tot=D[i].meals.length;
+    const pct=tot>0?Math.round(cnt/tot*100):0;
+    if(cnt>0){
+      totalDays++;totalPct+=pct;totalMeals+=cnt;
+      if(pct>bestPct){bestPct=pct;bestDay=dnames[i];}
+    }
+    gridHtml+=`<div class="wd ${cnt>0?'has':''}"><div class="wd-name">${dnames[i]}</div><div class="wd-pct">${cnt>0?pct+'%':'—'}</div></div>`;
+    barsHtml+=`<div style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:3px;"><span>${dnames[i]} — ${D[i].t.replace('🏋️ ','').replace('😴 ','')}</span><span>${cnt}/${tot}</span></div>
+      <div style="background:#2a2a2a;border-radius:4px;height:6px;"><div style="background:#22c55e;height:6px;border-radius:4px;width:${pct}%;transition:width 0.4s;"></div></div>
+    </div>`;
+  }
+
+  document.getElementById('week-grid').innerHTML=gridHtml;
+  document.getElementById('day-bars').innerHTML=barsHtml;
+  document.getElementById('s-days').textContent=totalDays;
+  document.getElementById('s-best').textContent=bestDay||'—';
+  document.getElementById('s-avg').textContent=totalDays>0?Math.round(totalPct/totalDays)+'%':'0%';
+  document.getElementById('s-total').textContent=totalMeals;
+}
+
+function clearAll(){
+  if(confirm('Сбросить все данные?')){
+    Object.keys(localStorage).filter(k=>k===SK).forEach(k=>localStorage.removeItem(k));
+    st={};render();
+  }
+}
+
 render();
 </script>
 </body>

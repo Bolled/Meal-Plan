@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Рацион">
+<title>Рацион</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f0f0f;color:#f0f0f0;max-width:430px;margin:0 auto;padding-bottom:20px;}
+button{font-family:-apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer;border:0.5px solid #333;background:#1a1a1a;color:#f0f0f0;}
+.header{background:#0f0f0f;padding:54px 16px 12px;position:sticky;top:0;z-index:100;border-bottom:1px solid #1a1a1a;}
+.header h1{font-size:26px;font-weight:700;}
+.header-sub{font-size:13px;color:#666;margin-top:2px;}
+.date-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
+.date-label{font-size:15px;font-weight:600;}
+.date-nav{display:flex;gap:8px;}
+.date-btn{width:32px;height:32px;border-radius:50%;font-size:18px;background:#1a1a1a;border:0.5px solid #333;}
+.prog-bar{background:#1a1a1a;height:5px;margin:10px 0 4px;border-radius:3px;}
+.prog-fill{background:#22c55e;height:5px;border-radius:3px;transition:width 0.4s;}
+.prog-text{font-size:11px;color:#666;text-align:center;}
+.macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px;}
+.mc{background:#1a1a1a;border-radius:12px;padding:10px 6px;text-align:center;}
+.mc-val{font-size:16px;font-weight:700;color:#22c55e;}
+.mc-val.gray{color:#666;}
+.mc-sub{font-size:10px;color:#555;margin-top:2px;}
+.tabs{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:7px 14px;border-radius:20px;font-size:13px;white-space:nowrap;flex-shrink:0;background:#1a1a1a;border:0.5px solid #333;color:#888;}
+.tab.active{background:#22c55e;color:#000;font-weight:600;border-color:#22c55e;}
+.tab.today{border-color:#22c55e;color:#22c55e;}
+.meals{padding:0 16px;}
+.day-type{font-size:13px;color:#666;margin-bottom:10px;}
+.meal{background:#1a1a1a;border-radius:16px;padding:14px;margin-bottom:10px;transition:opacity 0.2s;}
+.meal.done{opacity:0.55;}
+.meal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.meal-name{font-size:15px;font-weight:600;}
+.meal-time{font-size:12px;color:#666;font-weight:400;margin-left:6px;}
+.meal-kcal{font-size:12px;color:#888;background:#2a2a2a;padding:3px 10px;border-radius:10px;}
+.meal-items{margin-bottom:10px;}
+.meal-item{font-size:13px;color:#bbb;padding:5px 0;border-bottom:1px solid #2a2a2a;}
+.meal-item:last-child{border-bottom:none;}
+.meal-macs{display:flex;gap:14px;margin-bottom:12px;}
+.mm{font-size:11px;color:#555;}
+.mm b{color:#888;}
+.check-btn{width:100%;padding:11px;border-radius:10px;font-size:14px;background:#2a2a2a;border:0.5px solid #333;color:#aaa;transition:all 0.2s;}
+.check-btn:active{transform:scale(0.97);}
+.check-btn.checked{background:#052e16;color:#22c55e;border-color:#166534;}
+.rules{background:#1a1a1a;border-radius:16px;padding:14px;margin:12px 16px 0;}
+.rules h3{font-size:14px;color:#22c55e;margin-bottom:8px;}
+.rule{font-size:13px;color:#888;padding:4px 0;}
+.rule::before{content:"✓ ";color:#22c55e;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🥗 Рацион</h1>
+  <div class="header-sub">Рекомпозиция · Колит · 77кг</div>
+  <div class="date-row">
+    <div class="date-label" id="date-label"></div>
+    <div class="date-nav">
+      <button class="date-btn" onclick="chDay(-1)">‹</button>
+      <button class="date-btn" onclick="chDay(1)">›</button>
+    </div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+  <div class="prog-text" id="pt"></div>
+</div>
+
+<div class="macros" id="macros"></div>
+<div class="tabs" id="tabs"></div>
+<div class="meals" id="meals"></div>
+
+<div class="rules">
+  <h3>Правила при колите</h3>
+  <div class="rule">Овсянку варить на воде</div>
+  <div class="rule">Максимум 1 порция молочки в день</div>
+  <div class="rule">Все овощи только варёные</div>
+  <div class="rule">Последний приём за 2-3 часа до сна</div>
+  <div class="rule">Пить 2-3 литра воды в день</div>
+  <div class="rule">Салаза 1000мг утром и вечером</div>
+  <div class="rule">Подождать 1-1.5ч после еды перед залом</div>
+</div>
+
+<script>
+const D=[
+  {n:"Пн",t:"🏋️ День зала",tot:{k:2000,p:158,f:53,c:223},meals:[
+    {n:"Завтрак",t:"7:00",k:450,p:30,f:12,c:60,i:["Овсянка на воде 80г","Спелый банан","Мёд 1 ч.л.","Яйцо варёное 2 шт"]},
+    {n:"Перекус",t:"10:30",k:300,p:35,f:6,c:28,i:["Творог нежирный 200г","Мёд 1 ч.л."]},
+    {n:"Обед",t:"13:00",k:550,p:45,f:15,c:55,i:["Куриная грудка варёная 200г","Рис белый 150г","Морковь варёная","Оливковое масло 1 ч.л."]},
+    {n:"Предтрен",t:"16:00",k:200,p:8,f:2,c:40,i:["Банан","Чай ромашковый"]},
+    {n:"Ужин",t:"19:30",k:500,p:40,f:18,c:40,i:["Судак запечённый 200г","Гречка варёная 150г","Кабачок тушёный"]}
+  ]},
+  {n:"Вт",t:"🏋️ День зала",tot:{k:1980,p:158,f:56,c:211},meals:[
+    {n:"Завтрак",t:"7:00",k:420,p:28,f:14,c:50,i:["Омлет из 3 яиц на пару","Белый тост 2 шт","Чай ромашковый"]},
+    {n:"Перекус",t:"10:30",k:280,p:30,f:5,c:30,i:["Натуральный йогурт 200г","Банан"]},
+    {n:"Обед",t:"13:00",k:580,p:50,f:16,c:55,i:["Куриный фарш тушёный 200г","Картофельное пюре 200г","Морковь+кабачок"]},
+    {n:"Предтрен",t:"16:00",k:180,p:5,f:1,c:38,i:["Рисовые галеты 4 шт","Мёд 1 ч.л."]},
+    {n:"Ужин",t:"19:30",k:520,p:45,f:20,c:38,i:["Индейка варёная 200г","Гречка 150г","Тыква запечённая"]}
+  ]},
+  {n:"Ср",t:"😴 День отдыха",tot:{k:1800,p:152,f:50,c:190},meals:[
+    {n:"Завтрак",t:"8:00",k:400,p:25,f:12,c:55,i:["Овсянка на воде 80г","Яблоко варёное с мёдом","Яйцо варёное 1 шт"]},
+    {n:"Перекус",t:"11:00",k:250,p:32,f:5,c:20,i:["Творог нежирный 200г","Клубника тушёная 100г"]},
+    {n:"Обед",t:"13:30",k:520,p:45,f:14,c:52,i:["Суп куриный с рисом и морковью","Белый хлеб 1 ломтик"]},
+    {n:"Перекус 2",t:"16:30",k:180,p:10,f:3,c:28,i:["Банан","Кефир 150мл"]},
+    {n:"Ужин",t:"19:00",k:450,p:40,f:16,c:35,i:["Судак варёный 200г","Рис 120г","Кабачок тушёный"]}
+  ]},
+  {n:"Чт",t:"🏋️ День зала",tot:{k:2010,p:160,f:53,c:218},meals:[
+    {n:"Завтрак",t:"7:00",k:450,p:35,f:14,c:48,i:["Яйца варёные 3 шт","Белый тост 2 шт","Авокадо половина","Чай ромашковый"]},
+    {n:"Перекус",t:"10:30",k:280,p:30,f:5,c:32,i:["Натуральный йогурт 200г","Банан","Мёд 1 ч.л."]},
+    {n:"Обед",t:"13:00",k:560,p:48,f:15,c:54,i:["Куриная грудка 200г","Гречка варёная 150г","Морковь тушёная"]},
+    {n:"Предтрен",t:"16:00",k:200,p:5,f:1,c:42,i:["Банан","Финики 3 шт"]},
+    {n:"Ужин",t:"19:30",k:520,p:42,f:18,c:42,i:["Куриный фарш тушёный 200г","Картофель варёный 200г","Кабачок"]}
+  ]},
+  {n:"Пт",t:"🏋️ День зала",tot:{k:2010,p:166,f:55,c:210},meals:[
+    {n:"Завтрак",t:"7:00",k:430,p:28,f:12,c:58,i:["Овсянка на воде 80г","Банан","Мёд 1 ч.л.","Яйцо варёное 2 шт"]},
+    {n:"Перекус",t:"10:30",k:290,p:35,f:6,c:22,i:["Творог 200г","Мёд"]},
+    {n:"Обед",t:"13:00",k:560,p:50,f:14,c:54,i:["Индейка варёная 200г","Рис 150г","Морковь+кабачок тушёные"]},
+    {n:"Предтрен",t:"16:00",k:200,p:8,f:3,c:36,i:["Банан","Рисовые галеты"]},
+    {n:"Ужин",t:"19:30",k:530,p:45,f:20,c:40,i:["Судак/лосось 200г","Гречка 150г","Тыква запечённая"]}
+  ]},
+  {n:"Сб",t:"🏋️ День зала",tot:{k:2020,p:157,f:58,c:214},meals:[
+    {n:"Завтрак",t:"8:30",k:480,p:32,f:16,c:52,i:["Омлет из 3 яиц","Белый тост 2 шт","Авокадо половина","Чай"]},
+    {n:"Перекус",t:"11:30",k:280,p:28,f:5,c:34,i:["Натуральный йогурт 200г","Банан","Мёд"]},
+    {n:"Обед",t:"14:00",k:580,p:50,f:18,c:50,i:["Куриная грудка 200г","Картофельное пюре 200г","Морковь варёная"]},
+    {n:"Предтрен",t:"17:00",k:180,p:5,f:1,c:38,i:["Банан","Рисовые галеты"]},
+    {n:"Ужин",t:"20:00",k:500,p:42,f:18,c:40,i:["Куриный фарш/индейка 200г","Гречка 150г","Кабачок тушёный"]}
+  ]},
+  {n:"Вс",t:"😴 День отдыха",tot:{k:1800,p:145,f:50,c:195},meals:[
+    {n:"Завтрак",t:"9:00",k:400,p:25,f:12,c:55,i:["Овсянка на воде 80г","Яблоко варёное","Мёд","Яйцо 1 шт"]},
+    {n:"Перекус",t:"12:00",k:250,p:30,f:5,c:22,i:["Творог 200г","Клубника варёная"]},
+    {n:"Обед",t:"14:30",k:520,p:44,f:14,c:52,i:["Суп с курицей и рисом","Белый хлеб 1 ломтик"]},
+    {n:"Перекус 2",t:"17:00",k:180,p:8,f:3,c:28,i:["Банан","Кефир 150мл"]},
+    {n:"Ужин",t:"19:30",k:450,p:38,f:16,c:38,i:["Судак варёный 200г","Рис 120г","Тыква/кабачок"]}
+  ]}
+];
+
+const SK='mealplan_bolled';
+let st=JSON.parse(localStorage.getItem(SK)||'{}');
+let cur=(new Date().getDay()+6)%7;
+
+function save(){localStorage.setItem(SK,JSON.stringify(st));}
+function k(d,m){return d+'_'+m;}
+function chk(d,m){return !!st[k(d,m)];}
+function tog(d,m){st[k(d,m)]=!st[k(d,m)];save();render();}
+function chDay(x){cur=(cur+x+7)%7;render();}
+
+function render(){
+  const day=D[cur];
+  const tod=(new Date().getDay()+6)%7;
+  const dnames=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+  document.getElementById('date-label').textContent=dnames[cur];
+
+  const done=day.meals.filter((_,i)=>chk(cur,i));
+  const cnt=done.length,tot=day.meals.length;
+  const pct=Math.round(cnt/tot*100);
+  document.getElementById('pf').style.width=pct+'%';
+  document.getElementById('pt').textContent=cnt+' из '+tot+' приёмов ('+pct+'%)';
+
+  const dk=done.reduce((s,m)=>s+m.k,0);
+  const dp=done.reduce((s,m)=>s+m.p,0);
+  const df=done.reduce((s,m)=>s+m.f,0);
+  const dc=done.reduce((s,m)=>s+m.c,0);
+
+  document.getElementById('macros').innerHTML=[
+    ['Ккал',dk,day.tot.k],['Белок',dp,day.tot.p],
+    ['Жиры',df,day.tot.f],['Углев',dc,day.tot.c]
+  ].map(([l,d,t])=>`<div class="mc"><div class="mc-val ${d>0?'':'gray'}">${d}<span style="font-size:10px;color:#444;">/${t}</span></div><div class="mc-sub">${l}</div></div>`).join('');
+
+  document.getElementById('tabs').innerHTML=D.map((d,i)=>
+    `<button class="tab ${i===cur?'active':i===tod&&i!==cur?'today':''}" onclick="cur=${i};render()">${d.n}</button>`
+  ).join('');
+
+  document.getElementById('meals').innerHTML=`<div class="day-type">${day.t}</div>`+
+  day.meals.map((m,i)=>{
+    const done=chk(cur,i);
+    return `<div class="meal ${done?'done':''}">
+      <div class="meal-top">
+        <div class="meal-name">${m.n}<span class="meal-time">${m.t}</span></div>
+        <div class="meal-kcal">${m.k} ккал</div>
+      </div>
+      <div class="meal-items">${m.i.map(x=>`<div class="meal-item">• ${x}</div>`).join('')}</div>
+      <div class="meal-macs">
+        <span class="mm">Б: <b>${m.p}г</b></span>
+        <span class="mm">Ж: <b>${m.f}г</b></span>
+        <span class="mm">У: <b>${m.c}г</b></span>
+      </div>
+      <button class="check-btn ${done?'checked':''}" onclick="tog(${cur},${i})">
+        ${done?'✅ Выполнено':'○ Отметить как выполненное'}
+      </button>
+    </div>`;
+  }).join('');
+}
+render();
+</script>
+</body>
+</html>
